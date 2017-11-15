@@ -1,0 +1,26 @@
+GetCustName() : Tekst
+//Tasklet / DAR>>
+IF "Source No." <> '' THEN BEGIN
+  SalesHeader.SETRANGE("Document Type", SalesHeader."Document Type"::Order);
+  SalesHeader.SETRANGE("No.", "Source No.");
+  IF SalesHeader.FINDFIRST THEN BEGIN
+    IF Customer.GET(SalesHeader."Sell-to Customer No.") THEN
+      EXIT(Customer.Name);
+  END;
+END ELSE BEGIN
+  WarehouseActivityLine.RESET;
+  WarehouseActivityLine.SETRANGE("Activity Type",Type);
+  WarehouseActivityLine.SETRANGE("No.","No.");
+  WarehouseActivityLine.SETFILTER("Source No.",'<>%1','');
+  IF WarehouseActivityLine.FINDFIRST THEN BEGIN
+    SalesHeader.SETRANGE("Document Type", SalesHeader."Document Type"::Order);
+    SalesHeader.SETRANGE("No.", WarehouseActivityLine."Source No.");
+    IF SalesHeader.FINDFIRST THEN BEGIN
+      IF Customer.GET(SalesHeader."Sell-to Customer No.") THEN
+        EXIT(Customer.Name);
+    END;
+  END;
+END;
+
+EXIT('');
+//Tasklet<<
